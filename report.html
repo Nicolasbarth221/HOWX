@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Reportar problemas com a coleta de lixo">
+  <title>Reportar - EcoAlerta Floripa</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🌱 EcoAlerta Floripa</h1>
+      <p>Reporte problemas</p>
+    </header>
+
+    <nav role="navigation" aria-label="Navegação principal">
+      <a href="index.html">Home</a>
+      <a href="config.html">Configurar</a>
+      <a href="report.html" class="active" aria-current="page">Reportar</a>
+      <a href="guide.html">Guia</a>
+      <a href="history.html">Histórico</a>
+    </nav>
+
+    <main role="main">
+      <h2>📢 Reportar Ocorrência</h2>
+      
+      <div class="card">
+        <p class="text-muted">
+          Em apenas 3 cliques, relate problemas com a coleta de lixo no seu bairro. 
+          Seu relato será registrado localmente com um protocolo para acompanhamento.
+        </p>
+      </div>
+
+      <form id="formReport" aria-label="Formulário de reporte">
+        <!-- Motivo (3 botões) -->
+        <div class="form-group">
+          <label>1. Selecione o motivo *</label>
+          <div class="btn-group">
+            <button type="button" class="btn btn-outline motivo-btn" data-motivo="Coleta não passou">
+              🚫 Coleta não passou
+            </button>
+            <button type="button" class="btn btn-outline motivo-btn" data-motivo="Descarte irregular">
+              ⚠️ Descarte irregular
+            </button>
+            <button type="button" class="btn btn-outline motivo-btn" data-motivo="Outro">
+              ❓ Outro
+            </button>
+          </div>
+          <input type="hidden" id="motivoSelecionado" name="motivo" required>
+        </div>
+
+        <!-- Observação opcional -->
+        <div class="form-group">
+          <label for="observacao">2. Observações (opcional)</label>
+          <textarea 
+            id="observacao" 
+            name="observacao" 
+            placeholder="Descreva brevemente o problema ou adicione detalhes..."
+            maxlength="500"
+          ></textarea>
+          <small class="text-muted">Máximo 500 caracteres</small>
+        </div>
+
+        <!-- Botão enviar -->
+        <div class="form-group">
+          <label>3. Enviar reporte</label>
+          <button type="submit" class="btn" id="btnEnviar" disabled aria-label="Enviar reporte">
+            Enviar Reporte
+          </button>
+          <a href="index.html" class="btn btn-outline" aria-label="Cancelar">
+            Cancelar
+          </a>
+        </div>
+      </form>
+
+      <!-- Modal de confirmação (aparece após enviar) -->
+      <div id="modalSucesso" class="card success" style="display: none;" role="alert">
+        <h3>✅ Reporte Enviado!</h3>
+        <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">
+          <strong>Protocolo:</strong> <span id="protocoloGerado"></span>
+        </p>
+        <p style="opacity: 0.9; margin-bottom: 1rem;">
+          Seu reporte foi registrado localmente. Use o protocolo para referência futura.
+        </p>
+        <div class="btn-group">
+          <a href="history.html" class="btn btn-secondary">
+            Ver Histórico
+          </a>
+          <a href="index.html" class="btn btn-outline" style="background: white;">
+            Voltar à Home
+          </a>
+        </div>
+      </div>
+
+      <!-- Dicas -->
+      <div class="card mt-3">
+        <h3>💡 Dicas</h3>
+        <ul style="margin-left: 1.25rem; line-height: 1.8;">
+          <li><strong>Coleta não passou:</strong> Use se o caminhão não passou no horário esperado</li>
+          <li><strong>Descarte irregular:</strong> Reporte lixo descartado em local inadequado</li>
+          <li><strong>Outro:</strong> Qualquer outro problema relacionado à coleta</li>
+        </ul>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    let motivoSelecionado = null;
+
+    // Selecionar motivo
+    document.querySelectorAll('.motivo-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        // Remover seleção anterior
+        document.querySelectorAll('.motivo-btn').forEach(b => {
+          b.classList.remove('btn');
+          b.classList.add('btn-outline');
+        });
+        
+        // Marcar este como selecionado
+        this.classList.remove('btn-outline');
+        this.classList.add('btn');
+        
+        // Guardar motivo
+        motivoSelecionado = this.dataset.motivo;
+        document.getElementById('motivoSelecionado').value = motivoSelecionado;
+        
+        // Habilitar botão enviar
+        document.getElementById('btnEnviar').disabled = false;
+        
+        // Scroll suave para observações
+        document.getElementById('observacao').scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      });
+    });
+
+    // Submeter formulário
+    document.getElementById('formReport').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      if (!motivoSelecionado) {
+        showToast('Por favor, selecione um motivo', 3000);
+        return;
+      }
+      
+      const obs = document.getElementById('observacao').value.trim();
+      
+      // Criar reporte
+      const report = {
+        motivo: motivoSelecionado,
+        obs: obs,
+        ts: Date.now()
+      };
+      
+      // Adicionar ao histórico
+      const resultado = addReport(report);
+      
+      if (resultado.success) {
+        // Esconder formulário
+        document.getElementById('formReport').style.display = 'none';
+        
+        // Mostrar modal de sucesso
+        document.getElementById('protocoloGerado').textContent = resultado.protocolo;
+        document.getElementById('modalSucesso').style.display = 'block';
+        
+        // Scroll para o topo
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Mostrar toast
+        showToast(`✅ Protocolo gerado: ${resultado.protocolo}`, 4000);
+      } else {
+        showToast('Erro ao registrar reporte. Tente novamente.', 4000);
+      }
+    });
+
+    // Contador de caracteres
+    document.getElementById('observacao').addEventListener('input', function() {
+      const max = 500;
+      const atual = this.value.length;
+      const small = this.nextElementSibling;
+      small.textContent = `${atual}/${max} caracteres`;
+      
+      if (atual >= max) {
+        small.style.color = 'var(--danger-color)';
+      } else {
+        small.style.color = 'var(--text-light)';
+      }
+    });
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,33 @@
+[
+  {
+    "material": "Orgânico",
+    "comoDescartar": "Saco bem fechado para coleta regular",
+    "observacoes": "Evite líquidos. Restos de comida, cascas de frutas e verduras."
+  },
+  {
+    "material": "Reciclável",
+    "comoDescartar": "Separar papel, plástico, metal e vidro",
+    "observacoes": "Lavar recipientes antes. Não misturar com orgânicos."
+  },
+  {
+    "material": "Eletrônico",
+    "comoDescartar": "Levar a ponto de coleta específico",
+    "observacoes": "Não colocar na coleta comum. Pilhas, baterias, celulares, computadores."
+  },
+  {
+    "material": "Óleo de Cozinha",
+    "comoDescartar": "Armazenar em garrafa PET e levar a ponto de coleta",
+    "observacoes": "Nunca descartar na pia. Causa entupimentos e polui a água."
+  },
+  {
+    "material": "Vidro",
+    "comoDescartar": "Separar e colocar na coleta reciclável",
+    "observacoes": "Embalar com cuidado se estiver quebrado. Garrafas e potes limpos."
+  },
+  {
+    "material": "Papel",
+    "comoDescartar": "Separar e colocar na coleta reciclável",
+    "observacoes": "Papéis limpos e secos. Não descartar papel higiênico ou sujo de gordura."
+  }
+]
+

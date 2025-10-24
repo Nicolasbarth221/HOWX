@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Guia de descarte correto de materiais">
+  <title>Guia de Descarte - EcoAlerta Floripa</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🌱 EcoAlerta Floripa</h1>
+      <p>Guia de descarte correto</p>
+    </header>
+
+    <nav role="navigation" aria-label="Navegação principal">
+      <a href="index.html">Home</a>
+      <a href="config.html">Configurar</a>
+      <a href="report.html">Reportar</a>
+      <a href="guide.html" class="active" aria-current="page">Guia</a>
+      <a href="history.html">Histórico</a>
+    </nav>
+
+    <main role="main">
+      <h2>📖 Guia de Descarte</h2>
+      
+      <div class="card">
+        <p class="text-muted">
+          Consulte como descartar corretamente diferentes tipos de materiais. 
+          Use a busca para encontrar rapidamente o que procura.
+        </p>
+      </div>
+
+      <!-- Campo de busca -->
+      <div class="search-box">
+        <input 
+          type="text" 
+          id="inputBusca" 
+          class="input" 
+          placeholder="Buscar material (ex: plástico, orgânico...)"
+          aria-label="Buscar material"
+        >
+      </div>
+
+      <!-- Lista de materiais -->
+      <div id="listaMateriais" role="list">
+        <!-- Será preenchido dinamicamente -->
+      </div>
+
+      <!-- Estado vazio (quando não há resultados) -->
+      <div id="semResultados" class="empty-state" style="display: none;">
+        <div class="empty-state-icon">🔍</div>
+        <h3>Nenhum resultado encontrado</h3>
+        <p class="text-muted">Tente buscar por outro termo</p>
+      </div>
+
+      <!-- Informações adicionais -->
+      <div class="card mt-3" style="background: var(--bg-light);">
+        <h3>ℹ️ Informações Importantes</h3>
+        <ul style="margin-left: 1.25rem; line-height: 1.8;">
+          <li>Sempre limpe os materiais recicláveis antes de descartar</li>
+          <li>Não misture lixo orgânico com reciclável</li>
+          <li>Leve eletrônicos e pilhas a pontos de coleta específicos</li>
+          <li>Óleo de cozinha nunca deve ser descartado na pia</li>
+          <li>Em caso de dúvida, consulte este guia ou entre em contato com a prefeitura</li>
+        </ul>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    let todosOsMateriais = [];
+
+    // Inicializar página
+    async function init() {
+      try {
+        // Carregar guide.json
+        const response = await fetch('guide.json');
+        todosOsMateriais = await response.json();
+        
+        // Exibir todos os materiais inicialmente
+        exibirMateriais(todosOsMateriais);
+        
+      } catch (error) {
+        console.error('Erro ao carregar guia:', error);
+        showToast('Erro ao carregar guia de descarte', 5000);
+      }
+    }
+
+    // Exibir materiais na tela
+    function exibirMateriais(materiais) {
+      const container = document.getElementById('listaMateriais');
+      const semResultados = document.getElementById('semResultados');
+      
+      if (materiais.length === 0) {
+        container.innerHTML = '';
+        semResultados.style.display = 'block';
+        return;
+      }
+      
+      semResultados.style.display = 'none';
+      
+      container.innerHTML = materiais.map((item, index) => `
+        <div class="card" role="listitem">
+          <h3>${item.material}</h3>
+          <p><strong>Como descartar:</strong> ${item.comoDescartar}</p>
+          ${item.observacoes ? `<p class="text-muted"><strong>Observações:</strong> ${item.observacoes}</p>` : ''}
+        </div>
+      `).join('');
+    }
+
+    // Buscar materiais
+    document.getElementById('inputBusca').addEventListener('input', function(e) {
+      const termo = e.target.value.toLowerCase().trim();
+      
+      if (!termo) {
+        // Se busca vazia, mostrar todos
+        exibirMateriais(todosOsMateriais);
+        return;
+      }
+      
+      // Filtrar materiais
+      const filtrados = todosOsMateriais.filter(item => {
+        return item.material.toLowerCase().includes(termo) ||
+               item.comoDescartar.toLowerCase().includes(termo) ||
+               (item.observacoes && item.observacoes.toLowerCase().includes(termo));
+      });
+      
+      exibirMateriais(filtrados);
+    });
+
+    // Focar no campo de busca ao pressionar /
+    document.addEventListener('keydown', function(e) {
+      if (e.key === '/' && document.activeElement !== document.getElementById('inputBusca')) {
+        e.preventDefault();
+        document.getElementById('inputBusca').focus();
+      }
+    });
+
+    // Inicializar quando DOM estiver pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
+

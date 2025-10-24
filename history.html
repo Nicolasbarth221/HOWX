@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Histórico de reportes de problemas">
+  <title>Histórico - EcoAlerta Floripa</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🌱 EcoAlerta Floripa</h1>
+      <p>Seus reportes</p>
+    </header>
+
+    <nav role="navigation" aria-label="Navegação principal">
+      <a href="index.html">Home</a>
+      <a href="config.html">Configurar</a>
+      <a href="report.html">Reportar</a>
+      <a href="guide.html">Guia</a>
+      <a href="history.html" class="active" aria-current="page">Histórico</a>
+    </nav>
+
+    <main role="main">
+      <h2>📋 Histórico de Reportes</h2>
+      
+      <div class="card">
+        <p class="text-muted">
+          Todos os seus reportes são salvos localmente no seu navegador. 
+          Use o protocolo para referência futura.
+        </p>
+      </div>
+
+      <!-- Botões de ação -->
+      <div id="acoesHistorico" class="btn-group" style="display: none;">
+        <button id="btnExportar" class="btn btn-secondary" aria-label="Exportar histórico">
+          💾 Exportar JSON
+        </button>
+        <button id="btnLimpar" class="btn btn-danger" aria-label="Limpar histórico">
+          🗑️ Limpar Histórico
+        </button>
+      </div>
+
+      <!-- Lista de reportes -->
+      <div id="listaReportes" role="list">
+        <!-- Será preenchido dinamicamente -->
+      </div>
+
+      <!-- Estado vazio -->
+      <div id="estadoVazio" class="empty-state" style="display: none;">
+        <div class="empty-state-icon">📝</div>
+        <h3>Nenhum reporte ainda</h3>
+        <p class="text-muted mb-3">
+          Você ainda não fez nenhum reporte. Quando reportar problemas, 
+          eles aparecerão aqui para consulta futura.
+        </p>
+        <a href="report.html" class="btn">
+          Fazer Primeiro Reporte
+        </a>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    let reportes = [];
+
+    // Inicializar página
+    function init() {
+      carregarHistorico();
+    }
+
+    // Carregar e exibir histórico
+    function carregarHistorico() {
+      reportes = loadReports();
+      
+      if (reportes.length === 0) {
+        document.getElementById('estadoVazio').style.display = 'block';
+        document.getElementById('acoesHistorico').style.display = 'none';
+        return;
+      }
+      
+      document.getElementById('estadoVazio').style.display = 'none';
+      document.getElementById('acoesHistorico').style.display = 'flex';
+      
+      exibirReportes();
+    }
+
+    // Exibir reportes na tela
+    function exibirReportes() {
+      const container = document.getElementById('listaReportes');
+      
+      // Ordenar por mais recente primeiro
+      const reportesOrdenados = [...reportes].reverse();
+      
+      container.innerHTML = reportesOrdenados.map((reporte, index) => {
+        // Determinar badge de cor baseado no motivo
+        let badgeClass = 'secondary';
+        if (reporte.motivo === 'Coleta não passou') {
+          badgeClass = 'danger';
+        } else if (reporte.motivo === 'Descarte irregular') {
+          badgeClass = 'warning';
+        }
+        
+        return `
+          <div class="item" role="listitem">
+            <h4>
+              ${reporte.motivo}
+              <span class="badge ${badgeClass}">${reporte.protocolo}</span>
+            </h4>
+            <p><strong>Data:</strong> ${reporte.data}</p>
+            ${reporte.obs ? `<p><strong>Observações:</strong> ${reporte.obs}</p>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Exportar histórico como JSON
+    document.getElementById('btnExportar').addEventListener('click', function() {
+      if (reportes.length === 0) {
+        showToast('Não há reportes para exportar', 3000);
+        return;
+      }
+      
+      const dataAtual = new Date().toISOString().split('T')[0];
+      const filename = `ecoalerta-historico-${dataAtual}.json`;
+      
+      exportJSON(reportes, filename);
+      showToast(`✅ Histórico exportado: ${filename}`, 4000);
+    });
+
+    // Limpar histórico
+    document.getElementById('btnLimpar').addEventListener('click', function() {
+      if (reportes.length === 0) {
+        showToast('Histórico já está vazio', 3000);
+        return;
+      }
+      
+      const confirmar = confirm(
+        `Tem certeza que deseja limpar todo o histórico?\n\n` +
+        `${reportes.length} reporte(s) serão excluídos permanentemente.\n\n` +
+        `Esta ação não pode ser desfeita.`
+      );
+      
+      if (!confirmar) return;
+      
+      try {
+        localStorage.removeItem('ecoalerta.reports');
+        showToast('✅ Histórico limpo com sucesso', 3000);
+        
+        // Recarregar página
+        setTimeout(() => {
+          carregarHistorico();
+        }, 500);
+      } catch (error) {
+        console.error('Erro ao limpar histórico:', error);
+        showToast('Erro ao limpar histórico', 4000);
+      }
+    });
+
+    // Inicializar quando DOM estiver pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
+

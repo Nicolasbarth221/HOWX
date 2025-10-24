@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Configure seu bairro e dias de coleta">
+  <title>Configuração - EcoAlerta Floripa</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🌱 EcoAlerta Floripa</h1>
+      <p>Configure sua coleta</p>
+    </header>
+
+    <nav role="navigation" aria-label="Navegação principal">
+      <a href="index.html">Home</a>
+      <a href="config.html" class="active" aria-current="page">Configurar</a>
+      <a href="report.html">Reportar</a>
+      <a href="guide.html">Guia</a>
+      <a href="history.html">Histórico</a>
+    </nav>
+
+    <main role="main">
+      <h2>⚙️ Configuração</h2>
+      
+      <div class="card">
+        <p class="text-muted mb-2">
+          Informe seu bairro e selecione os dias e horários da coleta de lixo. 
+          Essas informações serão usadas para calcular a próxima coleta.
+        </p>
+      </div>
+
+      <form id="formConfig" aria-label="Formulário de configuração">
+        <!-- Seleção de bairro -->
+        <div class="form-group">
+          <label for="selectBairro">Bairro *</label>
+          <select id="selectBairro" name="bairro" required aria-required="true">
+            <option value="">Selecione seu bairro</option>
+          </select>
+        </div>
+
+        <!-- Dias e horários -->
+        <div class="form-group">
+          <label>Dias e Horários de Coleta *</label>
+          <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 0.75rem;">
+            Selecione os dias em que o caminhão de lixo passa no seu bairro.
+            Os horários padrão serão preenchidos automaticamente.
+          </p>
+          <div id="checkboxDias" class="checkbox-group" role="group" aria-label="Dias de coleta">
+            <!-- Será preenchido dinamicamente -->
+          </div>
+        </div>
+
+        <!-- Opção de personalizar horários -->
+        <div class="card" style="background: var(--bg-light); border: 1px solid var(--border-color);">
+          <p style="font-size: 0.9rem; margin-bottom: 0;">
+            💡 <strong>Dica:</strong> Os horários são preenchidos automaticamente com base no seu bairro. 
+            Você pode ajustá-los se necessário marcando/desmarcando os dias.
+          </p>
+        </div>
+
+        <!-- Botões -->
+        <div class="btn-group mt-3">
+          <button type="submit" class="btn" aria-label="Salvar configuração">
+            Salvar Configuração
+          </button>
+        </div>
+
+        <div class="btn-group">
+          <a href="index.html" class="btn btn-outline" aria-label="Cancelar e voltar">
+            Cancelar
+          </a>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    let calendarData = {};
+    let configAtual = null;
+
+    // Inicializar página
+    async function init() {
+      try {
+        // Carregar calendar.json
+        const response = await fetch('calendar.json');
+        calendarData = await response.json();
+        
+        // Carregar configuração atual
+        configAtual = loadConfig();
+        
+        // Popular select de bairros
+        popularBairros();
+        
+        // Se já tem config, pré-preencher
+        if (configAtual && configAtual.bairro) {
+          document.getElementById('selectBairro').value = configAtual.bairro;
+          atualizarDias(configAtual.bairro);
+          
+          // Marcar dias já configurados
+          if (configAtual.dias && configAtual.dias.length > 0) {
+            configAtual.dias.forEach(dia => {
+              const checkbox = document.querySelector(`input[value="${dia}"]`);
+              if (checkbox) checkbox.checked = true;
+            });
+          }
+        }
+        
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        showToast('Erro ao carregar dados de configuração', 5000);
+      }
+    }
+
+    // Popular select com bairros do calendar.json
+    function popularBairros() {
+      const select = document.getElementById('selectBairro');
+      const bairros = Object.keys(calendarData).sort();
+      
+      bairros.forEach(bairro => {
+        const option = document.createElement('option');
+        option.value = bairro;
+        option.textContent = bairro;
+        select.appendChild(option);
+      });
+    }
+
+    // Atualizar checkboxes de dias quando bairro mudar
+    document.getElementById('selectBairro').addEventListener('change', function(e) {
+      const bairro = e.target.value;
+      if (bairro) {
+        atualizarDias(bairro);
+      } else {
+        document.getElementById('checkboxDias').innerHTML = 
+          '<p class="text-muted">Selecione um bairro primeiro</p>';
+      }
+    });
+
+    // Atualizar lista de dias disponíveis
+    function atualizarDias(bairro) {
+      const container = document.getElementById('checkboxDias');
+      const dias = calendarData[bairro] || [];
+      
+      if (dias.length === 0) {
+        container.innerHTML = '<p class="text-muted">Nenhum dia disponível para este bairro</p>';
+        return;
+      }
+      
+      container.innerHTML = '';
+      
+      dias.forEach((dia, index) => {
+        const id = `dia${index}`;
+        const div = document.createElement('div');
+        div.className = 'checkbox-item';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = id;
+        checkbox.name = 'dias';
+        checkbox.value = dia;
+        checkbox.checked = true; // Marcar todos por padrão
+        
+        const label = document.createElement('label');
+        label.htmlFor = id;
+        label.textContent = dia;
+        
+        div.appendChild(checkbox);
+        div.appendChild(label);
+        container.appendChild(div);
+      });
+    }
+
+    // Submeter formulário
+    document.getElementById('formConfig').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const bairro = document.getElementById('selectBairro').value;
+      
+      if (!bairro) {
+        showToast('Por favor, selecione um bairro', 3000);
+        return;
+      }
+      
+      // Coletar dias marcados
+      const checkboxes = document.querySelectorAll('input[name="dias"]:checked');
+      const dias = Array.from(checkboxes).map(cb => cb.value);
+      
+      if (dias.length === 0) {
+        showToast('Selecione pelo menos um dia de coleta', 3000);
+        return;
+      }
+      
+      // Salvar configuração
+      const config = { bairro, dias };
+      const sucesso = saveConfig(config);
+      
+      if (sucesso) {
+        showToast('✅ Configuração salva com sucesso!', 2000);
+        
+        // Redirecionar para home após 2 segundos
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
+      } else {
+        showToast('Erro ao salvar configuração. Tente novamente.', 4000);
+      }
+    });
+
+    // Inicializar quando DOM estiver pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
+

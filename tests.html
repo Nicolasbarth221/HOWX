@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Testes unitários do EcoAlerta Floripa">
+  <title>Testes - EcoAlerta Floripa</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🌱 EcoAlerta Floripa</h1>
+      <p>Testes Unitários</p>
+    </header>
+
+    <nav role="navigation" aria-label="Navegação principal">
+      <a href="index.html">Home</a>
+      <a href="config.html">Configurar</a>
+      <a href="report.html">Reportar</a>
+      <a href="guide.html">Guia</a>
+      <a href="history.html">Histórico</a>
+    </nav>
+
+    <main role="main">
+      <h2>🧪 Testes Unitários</h2>
+      
+      <div class="card">
+        <p class="text-muted">
+          Esta página executa testes unitários automatizados das funções principais do EcoAlerta.
+          Os testes garantem que a lógica de cálculo de próxima coleta, reportes e outras funcionalidades estão corretas.
+        </p>
+      </div>
+
+      <div class="card" style="background: var(--bg-light);">
+        <h3>📋 O que está sendo testado</h3>
+        <ul style="margin-left: 1.25rem; line-height: 1.8;">
+          <li><strong>parseDiaSemana:</strong> Conversão de nomes de dias para números</li>
+          <li><strong>parseDiaHora:</strong> Extração de dia e horário de strings</li>
+          <li><strong>nextCollection:</strong> Cálculo da próxima coleta (casos diversos)</li>
+          <li><strong>isVesperaColeta:</strong> Detecção de véspera de coleta</li>
+          <li><strong>addReport:</strong> Geração de protocolos e salvamento</li>
+          <li><strong>formatHorasRestantes:</strong> Formatação de tempo restante</li>
+          <li><strong>saveConfig/loadConfig:</strong> Persistência de configuração</li>
+        </ul>
+      </div>
+
+      <!-- Resultados dos testes (preenchido por tests.js) -->
+      <div id="testResults">
+        <div class="text-center text-muted" style="padding: 2rem;">
+          Carregando testes...
+        </div>
+      </div>
+
+      <div class="card mt-3">
+        <h3>💡 Como funciona</h3>
+        <p style="line-height: 1.8;">
+          Os testes usam um mini framework desenvolvido especialmente para este projeto, 
+          sem dependências externas. Cada teste valida um comportamento específico das 
+          funções utilitárias em <code>app.js</code>.
+        </p>
+        <p style="line-height: 1.8; margin-top: 0.5rem;">
+          Testes que passam aparecem com ✅, e testes que falham com ❌. 
+          Se todos os testes passarem, o sistema está funcionando corretamente!
+        </p>
+      </div>
+
+      <div class="btn-group mt-2">
+        <button onclick="location.reload()" class="btn btn-secondary">
+          🔄 Executar Testes Novamente
+        </button>
+        <a href="index.html" class="btn btn-outline">
+          ← Voltar à Home
+        </a>
+      </div>
+
+      <div class="text-center text-muted mt-3" style="font-size: 0.85rem;">
+        <p>Os testes também são exibidos no Console do navegador (F12)</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Carregar app.js primeiro (contém as funções a testar) -->
+  <script src="app.js"></script>
+  
+  <!-- Depois carregar e executar os testes -->
+  <script src="tests.js"></script>
+</body>
+</html>
+

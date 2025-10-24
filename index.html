@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EcoAlerta Floripa - Nunca perca o dia da coleta de lixo">
+  <title>EcoAlerta Floripa - Home</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🌱 EcoAlerta Floripa</h1>
+      <p>Nunca perca o dia da coleta de lixo</p>
+    </header>
+
+    <nav role="navigation" aria-label="Navegação principal">
+      <a href="index.html" class="active" aria-current="page">Home</a>
+      <a href="config.html">Configurar</a>
+      <a href="report.html">Reportar</a>
+      <a href="guide.html">Guia</a>
+      <a href="history.html">Histórico</a>
+    </nav>
+
+    <main role="main">
+      <!-- Banner de lembrete (aparece só na véspera) -->
+      <div id="bannerLembrete" class="banner" style="display: none;" role="alert">
+        <strong>⏰ Lembrete:</strong> <span id="lembreteTexto"></span>
+      </div>
+
+      <!-- Card principal com próxima coleta -->
+      <div id="cardProximaColeta" style="display: none;">
+        <div class="card success">
+          <h3>📅 Próxima Coleta</h3>
+          <p id="proximaColetaInfo" style="font-size: 1.1rem; margin-bottom: 0.5rem;"></p>
+          <p id="tempoRestante" style="opacity: 0.9;"></p>
+        </div>
+
+        <div class="card">
+          <h3>Seu Bairro: <span id="bairroAtual"></span></h3>
+          <p><strong>Dias de coleta:</strong></p>
+          <ul id="diasColeta" style="margin-left: 1.25rem; margin-top: 0.5rem;"></ul>
+          <a href="config.html" class="btn btn-outline mt-2">Alterar Configuração</a>
+        </div>
+      </div>
+
+      <!-- Estado vazio (quando não há configuração) -->
+      <div id="estadoVazio" class="empty-state" style="display: none;">
+        <div class="empty-state-icon">📍</div>
+        <h3>Bem-vindo ao EcoAlerta!</h3>
+        <p class="text-muted mb-3">Configure seu bairro e dias de coleta para começar a receber lembretes.</p>
+        <a href="config.html" class="btn">Configurar Agora</a>
+      </div>
+
+      <!-- Ações rápidas -->
+      <div id="acoesRapidas" style="display: none;">
+        <h3 class="mt-3 mb-2">Ações Rápidas</h3>
+        
+        <a href="report.html" class="btn btn-secondary">
+          📢 Reportar Problema
+        </a>
+        
+        <a href="guide.html" class="btn btn-outline">
+          📖 Consultar Guia de Descarte
+        </a>
+      </div>
+
+      <!-- Informações úteis -->
+      <div class="card mt-3">
+        <h3>💡 Dicas</h3>
+        <ul style="margin-left: 1.25rem; line-height: 1.8;">
+          <li>Separe o lixo reciclável do orgânico</li>
+          <li>Coloque o lixo para fora apenas no horário correto</li>
+          <li>Lave os recicláveis antes de descartar</li>
+          <li>Reporte problemas para melhorar o serviço</li>
+        </ul>
+      </div>
+
+      <div class="text-center text-muted mt-3" style="font-size: 0.9rem;">
+        <p>EcoAlerta Floripa - MVP Demonstrativo</p>
+        <p><a href="tests.html" style="color: var(--text-light);">Executar Testes</a></p>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Carrega dados e inicializa página
+    async function init() {
+      try {
+        // Carregar calendar.json
+        const response = await fetch('calendar.json');
+        const calendar = await response.json();
+        
+        // Carregar configuração do usuário
+        const config = loadConfig();
+        
+        if (!config || !config.bairro) {
+          // Mostrar estado vazio
+          document.getElementById('estadoVazio').style.display = 'block';
+          return;
+        }
+        
+        // Mostrar card de próxima coleta
+        document.getElementById('cardProximaColeta').style.display = 'block';
+        document.getElementById('acoesRapidas').style.display = 'block';
+        
+        // Exibir bairro
+        document.getElementById('bairroAtual').textContent = config.bairro;
+        
+        // Exibir dias de coleta
+        const diasList = document.getElementById('diasColeta');
+        const dias = config.dias && config.dias.length > 0 
+          ? config.dias 
+          : (calendar[config.bairro] || []);
+        
+        if (dias.length > 0) {
+          diasList.innerHTML = dias.map(d => `<li>${d}</li>`).join('');
+        } else {
+          diasList.innerHTML = '<li class="text-muted">Nenhum dia configurado</li>';
+        }
+        
+        // Calcular próxima coleta
+        const now = new Date();
+        const proxima = nextCollection(now, config, calendar);
+        
+        if (proxima) {
+          // Mostrar informações
+          document.getElementById('proximaColetaInfo').textContent = 
+            formatDate(proxima.date);
+          document.getElementById('tempoRestante').textContent = 
+            `Faltam ${formatHorasRestantes(proxima.horasRestantes)}`;
+          
+          // Verificar se é véspera
+          if (isVesperaColeta(now, proxima)) {
+            const banner = document.getElementById('bannerLembrete');
+            const texto = document.getElementById('lembreteTexto');
+            
+            const horaColeta = proxima.date.toLocaleTimeString('pt-BR', { 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            });
+            
+            texto.textContent = `Coleta amanhã às ${horaColeta}. Prepare seu lixo!`;
+            banner.style.display = 'block';
+          }
+        } else {
+          document.getElementById('proximaColetaInfo').textContent = 
+            'Não foi possível calcular a próxima coleta';
+          document.getElementById('tempoRestante').textContent = 
+            'Verifique sua configuração';
+        }
+        
+      } catch (error) {
+        console.error('Erro ao inicializar:', error);
+        document.getElementById('estadoVazio').style.display = 'block';
+        showToast('Erro ao carregar dados. Verifique sua conexão.', 5000);
+      }
+    }
+    
+    // Inicializar quando o DOM estiver pronto
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
+

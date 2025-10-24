@@ -1,6 +1,7 @@
 # EcoAlerta Floripa
 
 Sistema web para gerenciamento de coleta de lixo em Florianópolis.
+Acesse: https://nicolasbarth221.github.io/HOWX/
 
 ## Sobre o Projeto
 

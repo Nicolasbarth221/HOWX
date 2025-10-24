@@ -1,9 +1,3 @@
-/* ==========================================
-   EcoAlerta Floripa - Estilos
-   Mobile-first, responsivo e acessível
-   ========================================== */
-
-/* Reset básico */
 * {
   margin: 0;
   padding: 0;
@@ -48,7 +42,6 @@ body {
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
 }
 
-/* Header */
 header {
   background: var(--primary-color);
   color: white;
@@ -68,7 +61,6 @@ header p {
   opacity: 0.95;
 }
 
-/* Navegação */
 nav {
   background: white;
   border-bottom: 1px solid var(--border-color);
@@ -108,12 +100,10 @@ nav a.active {
   color: white;
 }
 
-/* Conteúdo principal */
 main {
   padding: 1.5rem;
 }
 
-/* Títulos */
 h1, h2, h3 {
   color: var(--text-color);
   margin-bottom: 1rem;
@@ -129,7 +119,6 @@ h3 {
   font-weight: 600;
 }
 
-/* Cards */
 .card {
   background: white;
   border: 1px solid var(--border-color);
@@ -188,7 +177,6 @@ h3 {
   color: var(--text-light);
 }
 
-/* Banner de lembrete */
 .banner {
   background: var(--warning-color);
   color: white;
@@ -206,7 +194,6 @@ h3 {
   50% { transform: scale(1.02); }
 }
 
-/* Botões */
 .btn {
   display: inline-block;
   padding: 0.875rem 1.5rem;
@@ -276,7 +263,6 @@ h3 {
   gap: 0.75rem;
 }
 
-/* Inputs e Forms */
 .form-group {
   margin-bottom: 1.25rem;
 }
@@ -315,7 +301,6 @@ textarea {
   line-height: 1.5;
 }
 
-/* Checkbox personalizado */
 .checkbox-group {
   margin-bottom: 1rem;
 }
@@ -350,7 +335,6 @@ textarea {
   flex: 1;
 }
 
-/* Lista de itens */
 .item-list {
   list-style: none;
 }
@@ -380,7 +364,6 @@ textarea {
   color: var(--text-color);
 }
 
-/* Campo de busca */
 .search-box {
   margin-bottom: 1.5rem;
 }
@@ -393,7 +376,6 @@ textarea {
   background-position: 0.75rem center;
 }
 
-/* Toast notification */
 .toast {
   position: fixed;
   bottom: -100px;
@@ -415,7 +397,6 @@ textarea {
   bottom: 2rem;
 }
 
-/* Badges */
 .badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
@@ -438,7 +419,6 @@ textarea {
   background: var(--danger-color);
 }
 
-/* Utilitários */
 .text-center {
   text-align: center;
 }
@@ -454,7 +434,6 @@ textarea {
 .mb-2 { margin-bottom: 1rem; }
 .mb-3 { margin-bottom: 1.5rem; }
 
-/* Estados vazios */
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
@@ -472,7 +451,6 @@ textarea {
   font-weight: 500;
 }
 
-/* Destaque de foco para acessibilidade */
 *:focus {
   outline: 3px solid rgba(46, 204, 113, 0.3);
   outline-offset: 2px;
@@ -483,7 +461,6 @@ button:focus,
   outline: 3px solid rgba(46, 204, 113, 0.5);
 }
 
-/* Testes page */
 .test-result {
   padding: 0.75rem;
   margin-bottom: 0.5rem;
@@ -514,7 +491,6 @@ button:focus,
   margin-bottom: 1.5rem;
 }
 
-/* Responsivo - Tablets e maiores */
 @media (min-width: 768px) {
   nav {
     justify-content: center;
@@ -536,7 +512,6 @@ button:focus,
   }
 }
 
-/* Print styles */
 @media print {
   nav, .btn, .banner {
     display: none;

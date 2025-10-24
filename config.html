@@ -33,7 +33,6 @@
       </div>
 
       <form id="formConfig" aria-label="Formulário de configuração">
-        <!-- Seleção de bairro -->
         <div class="form-group">
           <label for="selectBairro">Bairro *</label>
           <select id="selectBairro" name="bairro" required aria-required="true">
@@ -41,19 +40,15 @@
           </select>
         </div>
 
-        <!-- Dias e horários -->
         <div class="form-group">
           <label>Dias e Horários de Coleta *</label>
           <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 0.75rem;">
             Selecione os dias em que o caminhão de lixo passa no seu bairro.
             Os horários padrão serão preenchidos automaticamente.
           </p>
-          <div id="checkboxDias" class="checkbox-group" role="group" aria-label="Dias de coleta">
-            <!-- Será preenchido dinamicamente -->
-          </div>
+          <div id="checkboxDias" class="checkbox-group" role="group" aria-label="Dias de coleta"></div>
         </div>
 
-        <!-- Opção de personalizar horários -->
         <div class="card" style="background: var(--bg-light); border: 1px solid var(--border-color);">
           <p style="font-size: 0.9rem; margin-bottom: 0;">
             💡 <strong>Dica:</strong> Os horários são preenchidos automaticamente com base no seu bairro. 
@@ -61,7 +56,6 @@
           </p>
         </div>
 
-        <!-- Botões -->
         <div class="btn-group mt-3">
           <button type="submit" class="btn" aria-label="Salvar configuração">
             Salvar Configuração
@@ -82,25 +76,17 @@
     let calendarData = {};
     let configAtual = null;
 
-    // Inicializar página
     async function init() {
       try {
-        // Carregar calendar.json
         const response = await fetch('calendar.json');
         calendarData = await response.json();
-        
-        // Carregar configuração atual
         configAtual = loadConfig();
-        
-        // Popular select de bairros
         popularBairros();
         
-        // Se já tem config, pré-preencher
         if (configAtual && configAtual.bairro) {
           document.getElementById('selectBairro').value = configAtual.bairro;
           atualizarDias(configAtual.bairro);
           
-          // Marcar dias já configurados
           if (configAtual.dias && configAtual.dias.length > 0) {
             configAtual.dias.forEach(dia => {
               const checkbox = document.querySelector(`input[value="${dia}"]`);
@@ -115,7 +101,6 @@
       }
     }
 
-    // Popular select com bairros do calendar.json
     function popularBairros() {
       const select = document.getElementById('selectBairro');
       const bairros = Object.keys(calendarData).sort();
@@ -128,7 +113,6 @@
       });
     }
 
-    // Atualizar checkboxes de dias quando bairro mudar
     document.getElementById('selectBairro').addEventListener('change', function(e) {
       const bairro = e.target.value;
       if (bairro) {
@@ -139,7 +123,6 @@
       }
     });
 
-    // Atualizar lista de dias disponíveis
     function atualizarDias(bairro) {
       const container = document.getElementById('checkboxDias');
       const dias = calendarData[bairro] || [];
@@ -161,7 +144,7 @@
         checkbox.id = id;
         checkbox.name = 'dias';
         checkbox.value = dia;
-        checkbox.checked = true; // Marcar todos por padrão
+        checkbox.checked = true;
         
         const label = document.createElement('label');
         label.htmlFor = id;
@@ -173,7 +156,6 @@
       });
     }
 
-    // Submeter formulário
     document.getElementById('formConfig').addEventListener('submit', function(e) {
       e.preventDefault();
       
@@ -184,7 +166,6 @@
         return;
       }
       
-      // Coletar dias marcados
       const checkboxes = document.querySelectorAll('input[name="dias"]:checked');
       const dias = Array.from(checkboxes).map(cb => cb.value);
       
@@ -193,14 +174,12 @@
         return;
       }
       
-      // Salvar configuração
       const config = { bairro, dias };
       const sucesso = saveConfig(config);
       
       if (sucesso) {
         showToast('✅ Configuração salva com sucesso!', 2000);
         
-        // Redirecionar para home após 2 segundos
         setTimeout(() => {
           window.location.href = 'index.html';
         }, 2000);
@@ -209,7 +188,6 @@
       }
     });
 
-    // Inicializar quando DOM estiver pronto
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
     } else {

@@ -33,7 +33,6 @@
       </div>
 
       <form id="formReport" aria-label="Formulário de reporte">
-        <!-- Motivo (3 botões) -->
         <div class="form-group">
           <label>1. Selecione o motivo *</label>
           <div class="btn-group">
@@ -50,7 +49,6 @@
           <input type="hidden" id="motivoSelecionado" name="motivo" required>
         </div>
 
-        <!-- Observação opcional -->
         <div class="form-group">
           <label for="observacao">2. Observações (opcional)</label>
           <textarea 
@@ -62,7 +60,6 @@
           <small class="text-muted">Máximo 500 caracteres</small>
         </div>
 
-        <!-- Botão enviar -->
         <div class="form-group">
           <label>3. Enviar reporte</label>
           <button type="submit" class="btn" id="btnEnviar" disabled aria-label="Enviar reporte">
@@ -74,7 +71,6 @@
         </div>
       </form>
 
-      <!-- Modal de confirmação (aparece após enviar) -->
       <div id="modalSucesso" class="card success" style="display: none;" role="alert">
         <h3>✅ Reporte Enviado!</h3>
         <p style="font-size: 1.1rem; margin-bottom: 0.5rem;">
@@ -93,7 +89,6 @@
         </div>
       </div>
 
-      <!-- Dicas -->
       <div class="card mt-3">
         <h3>💡 Dicas</h3>
         <ul style="margin-left: 1.25rem; line-height: 1.8;">
@@ -109,27 +104,21 @@
   <script>
     let motivoSelecionado = null;
 
-    // Selecionar motivo
     document.querySelectorAll('.motivo-btn').forEach(btn => {
       btn.addEventListener('click', function() {
-        // Remover seleção anterior
         document.querySelectorAll('.motivo-btn').forEach(b => {
           b.classList.remove('btn');
           b.classList.add('btn-outline');
         });
         
-        // Marcar este como selecionado
         this.classList.remove('btn-outline');
         this.classList.add('btn');
         
-        // Guardar motivo
         motivoSelecionado = this.dataset.motivo;
         document.getElementById('motivoSelecionado').value = motivoSelecionado;
         
-        // Habilitar botão enviar
         document.getElementById('btnEnviar').disabled = false;
         
-        // Scroll suave para observações
         document.getElementById('observacao').scrollIntoView({ 
           behavior: 'smooth', 
           block: 'center' 
@@ -137,7 +126,6 @@
       });
     });
 
-    // Submeter formulário
     document.getElementById('formReport').addEventListener('submit', function(e) {
       e.preventDefault();
       
@@ -148,35 +136,28 @@
       
       const obs = document.getElementById('observacao').value.trim();
       
-      // Criar reporte
       const report = {
         motivo: motivoSelecionado,
         obs: obs,
         ts: Date.now()
       };
       
-      // Adicionar ao histórico
       const resultado = addReport(report);
       
       if (resultado.success) {
-        // Esconder formulário
         document.getElementById('formReport').style.display = 'none';
         
-        // Mostrar modal de sucesso
         document.getElementById('protocoloGerado').textContent = resultado.protocolo;
         document.getElementById('modalSucesso').style.display = 'block';
         
-        // Scroll para o topo
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
-        // Mostrar toast
         showToast(`✅ Protocolo gerado: ${resultado.protocolo}`, 4000);
       } else {
         showToast('Erro ao registrar reporte. Tente novamente.', 4000);
       }
     });
 
-    // Contador de caracteres
     document.getElementById('observacao').addEventListener('input', function() {
       const max = 500;
       const atual = this.value.length;

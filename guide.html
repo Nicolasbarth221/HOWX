@@ -32,7 +32,6 @@
         </p>
       </div>
 
-      <!-- Campo de busca -->
       <div class="search-box">
         <input 
           type="text" 
@@ -43,19 +42,14 @@
         >
       </div>
 
-      <!-- Lista de materiais -->
-      <div id="listaMateriais" role="list">
-        <!-- Será preenchido dinamicamente -->
-      </div>
+      <div id="listaMateriais" role="list"></div>
 
-      <!-- Estado vazio (quando não há resultados) -->
       <div id="semResultados" class="empty-state" style="display: none;">
         <div class="empty-state-icon">🔍</div>
         <h3>Nenhum resultado encontrado</h3>
         <p class="text-muted">Tente buscar por outro termo</p>
       </div>
 
-      <!-- Informações adicionais -->
       <div class="card mt-3" style="background: var(--bg-light);">
         <h3>ℹ️ Informações Importantes</h3>
         <ul style="margin-left: 1.25rem; line-height: 1.8;">
@@ -73,14 +67,11 @@
   <script>
     let todosOsMateriais = [];
 
-    // Inicializar página
     async function init() {
       try {
-        // Carregar guide.json
         const response = await fetch('guide.json');
         todosOsMateriais = await response.json();
         
-        // Exibir todos os materiais inicialmente
         exibirMateriais(todosOsMateriais);
         
       } catch (error) {
@@ -89,7 +80,6 @@
       }
     }
 
-    // Exibir materiais na tela
     function exibirMateriais(materiais) {
       const container = document.getElementById('listaMateriais');
       const semResultados = document.getElementById('semResultados');
@@ -111,17 +101,14 @@
       `).join('');
     }
 
-    // Buscar materiais
     document.getElementById('inputBusca').addEventListener('input', function(e) {
       const termo = e.target.value.toLowerCase().trim();
       
       if (!termo) {
-        // Se busca vazia, mostrar todos
         exibirMateriais(todosOsMateriais);
         return;
       }
       
-      // Filtrar materiais
       const filtrados = todosOsMateriais.filter(item => {
         return item.material.toLowerCase().includes(termo) ||
                item.comoDescartar.toLowerCase().includes(termo) ||
@@ -131,7 +118,6 @@
       exibirMateriais(filtrados);
     });
 
-    // Focar no campo de busca ao pressionar /
     document.addEventListener('keydown', function(e) {
       if (e.key === '/' && document.activeElement !== document.getElementById('inputBusca')) {
         e.preventDefault();
@@ -139,7 +125,6 @@
       }
     });
 
-    // Inicializar quando DOM estiver pronto
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
     } else {

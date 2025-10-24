@@ -32,7 +32,6 @@
         </p>
       </div>
 
-      <!-- Botões de ação -->
       <div id="acoesHistorico" class="btn-group" style="display: none;">
         <button id="btnExportar" class="btn btn-secondary" aria-label="Exportar histórico">
           💾 Exportar JSON
@@ -42,12 +41,8 @@
         </button>
       </div>
 
-      <!-- Lista de reportes -->
-      <div id="listaReportes" role="list">
-        <!-- Será preenchido dinamicamente -->
-      </div>
+      <div id="listaReportes" role="list"></div>
 
-      <!-- Estado vazio -->
       <div id="estadoVazio" class="empty-state" style="display: none;">
         <div class="empty-state-icon">📝</div>
         <h3>Nenhum reporte ainda</h3>
@@ -66,12 +61,10 @@
   <script>
     let reportes = [];
 
-    // Inicializar página
     function init() {
       carregarHistorico();
     }
 
-    // Carregar e exibir histórico
     function carregarHistorico() {
       reportes = loadReports();
       
@@ -87,15 +80,12 @@
       exibirReportes();
     }
 
-    // Exibir reportes na tela
     function exibirReportes() {
       const container = document.getElementById('listaReportes');
       
-      // Ordenar por mais recente primeiro
       const reportesOrdenados = [...reportes].reverse();
       
       container.innerHTML = reportesOrdenados.map((reporte, index) => {
-        // Determinar badge de cor baseado no motivo
         let badgeClass = 'secondary';
         if (reporte.motivo === 'Coleta não passou') {
           badgeClass = 'danger';
@@ -116,7 +106,6 @@
       }).join('');
     }
 
-    // Exportar histórico como JSON
     document.getElementById('btnExportar').addEventListener('click', function() {
       if (reportes.length === 0) {
         showToast('Não há reportes para exportar', 3000);
@@ -130,7 +119,6 @@
       showToast(`✅ Histórico exportado: ${filename}`, 4000);
     });
 
-    // Limpar histórico
     document.getElementById('btnLimpar').addEventListener('click', function() {
       if (reportes.length === 0) {
         showToast('Histórico já está vazio', 3000);
@@ -149,7 +137,6 @@
         localStorage.removeItem('ecoalerta.reports');
         showToast('✅ Histórico limpo com sucesso', 3000);
         
-        // Recarregar página
         setTimeout(() => {
           carregarHistorico();
         }, 500);
@@ -159,7 +146,6 @@
       }
     });
 
-    // Inicializar quando DOM estiver pronto
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
     } else {

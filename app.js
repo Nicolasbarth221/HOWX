@@ -1,19 +1,5 @@
-// ==========================================
-// EcoAlerta Floripa - Lógica Principal
-// ==========================================
-
-// Configuração
 const STORAGE_KEY_CONFIG = 'ecoalerta.config';
 const STORAGE_KEY_REPORTS = 'ecoalerta.reports';
-
-// ==========================================
-// Funções Utilitárias Puras (Testáveis)
-// ==========================================
-
-/**
- * Carrega configuração do usuário do LocalStorage
- * @returns {Object|null} { bairro: string, dias: ["2ª 07:00", ...] } ou null
- */
 function loadConfig() {
   try {
     const data = localStorage.getItem(STORAGE_KEY_CONFIG);
@@ -24,10 +10,6 @@ function loadConfig() {
   }
 }
 
-/**
- * Salva configuração do usuário no LocalStorage
- * @param {Object} cfg - { bairro: string, dias: ["2ª 07:00", ...] }
- */
 function saveConfig(cfg) {
   try {
     localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(cfg));
@@ -38,11 +20,6 @@ function saveConfig(cfg) {
   }
 }
 
-/**
- * Converte texto de dia da semana para número (0-6, domingo=0)
- * @param {string} diaTexto - Ex: "2ª", "3ª", "Sábado"
- * @returns {number} - 0 a 6
- */
 function parseDiaSemana(diaTexto) {
   const mapa = {
     'domingo': 0, 'dom': 0,
@@ -58,11 +35,6 @@ function parseDiaSemana(diaTexto) {
   return mapa[key] !== undefined ? mapa[key] : -1;
 }
 
-/**
- * Extrai dia da semana e hora de string "2ª 07:00"
- * @param {string} diaHora - Ex: "2ª 07:00"
- * @returns {Object} { diaSemana: number, hora: number, minuto: number }
- */
 function parseDiaHora(diaHora) {
   const partes = diaHora.trim().split(/\s+/);
   const diaTexto = partes[0];
@@ -77,24 +49,15 @@ function parseDiaHora(diaHora) {
   };
 }
 
-/**
- * Calcula próxima ocorrência de coleta
- * @param {Date} now - Data/hora atual
- * @param {Object} cfg - Config do usuário { bairro, dias }
- * @param {Object} calendarJson - Mapa de bairro -> dias
- * @returns {Object|null} { diaTexto, date, horasRestantes } ou null
- */
 function nextCollection(now, cfg, calendarJson) {
   if (!cfg || !cfg.bairro) return null;
   
-  // Usar dias da config se existirem, senão do calendar
   let diasColeta = cfg.dias && cfg.dias.length > 0 
     ? cfg.dias 
     : (calendarJson[cfg.bairro] || []);
   
   if (diasColeta.length === 0) return null;
   
-  // Converter todos os dias/horas em objetos
   const coletas = diasColeta.map(dh => {
     const parsed = parseDiaHora(dh);
     return { original: dh, ...parsed };
@@ -102,19 +65,16 @@ function nextCollection(now, cfg, calendarJson) {
   
   if (coletas.length === 0) return null;
   
-  // Encontrar próxima coleta
   const nowTime = now.getTime();
   let proximaColeta = null;
   let menorDiff = Infinity;
   
-  // Verificar próximas 2 semanas (14 dias)
   for (let i = 0; i < 14; i++) {
     const dataCandidata = new Date(now);
     dataCandidata.setDate(now.getDate() + i);
     
     const diaSemana = dataCandidata.getDay();
     
-    // Ver se alguma coleta cai nesse dia
     for (const coleta of coletas) {
       if (coleta.diaSemana === diaSemana) {
         const dataColeta = new Date(dataCandidata);
@@ -122,7 +82,6 @@ function nextCollection(now, cfg, calendarJson) {
         
         const diff = dataColeta.getTime() - nowTime;
         
-        // Só considerar futuras
         if (diff > 0 && diff < menorDiff) {
           menorDiff = diff;
           proximaColeta = {
@@ -138,26 +97,15 @@ function nextCollection(now, cfg, calendarJson) {
   return proximaColeta;
 }
 
-/**
- * Verifica se é véspera de coleta (20h do dia anterior em diante)
- * @param {Date} now - Data/hora atual
- * @param {Object} proximaColeta - Resultado de nextCollection
- * @returns {boolean}
- */
 function isVesperaColeta(now, proximaColeta) {
   if (!proximaColeta || !proximaColeta.date) return false;
   
   const diff = proximaColeta.date.getTime() - now.getTime();
   const horas = diff / (1000 * 60 * 60);
   
-  // Véspera = entre 4 e 24 horas antes
   return horas > 4 && horas <= 24;
 }
 
-/**
- * Carrega histórico de relatórios
- * @returns {Array} Array de relatórios
- */
 function loadReports() {
   try {
     const data = localStorage.getItem(STORAGE_KEY_REPORTS);
@@ -168,11 +116,6 @@ function loadReports() {
   }
 }
 
-/**
- * Adiciona um relatório ao histórico
- * @param {Object} report - { motivo, obs, ts }
- * @returns {Object} { protocolo, success }
- */
 function addReport(report) {
   try {
     const reports = loadReports();
@@ -197,11 +140,6 @@ function addReport(report) {
   }
 }
 
-/**
- * Formata data para exibição
- * @param {Date} date
- * @returns {string}
- */
 function formatDate(date) {
   const dias = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
   const dia = dias[date.getDay()];
@@ -212,11 +150,6 @@ function formatDate(date) {
   return `${dia}, ${dataStr} às ${hora}:${min}`;
 }
 
-/**
- * Formata diferença de horas de forma amigável
- * @param {number} horas
- * @returns {string}
- */
 function formatHorasRestantes(horas) {
   if (horas < 1) return 'menos de 1 hora';
   if (horas === 1) return '1 hora';
@@ -231,17 +164,7 @@ function formatHorasRestantes(horas) {
   return `${dias} dias e ${horasResto}h`;
 }
 
-// ==========================================
-// Funções de UI (dependem do DOM)
-// ==========================================
-
-/**
- * Mostra toast temporário
- * @param {string} message
- * @param {number} duration - em ms
- */
 function showToast(message, duration = 3000) {
-  // Remove toast anterior se existir
   const existing = document.querySelector('.toast');
   if (existing) existing.remove();
   
@@ -250,7 +173,6 @@ function showToast(message, duration = 3000) {
   toast.textContent = message;
   document.body.appendChild(toast);
   
-  // Adiciona classe para animação
   setTimeout(() => toast.classList.add('show'), 10);
   
   setTimeout(() => {
@@ -259,11 +181,6 @@ function showToast(message, duration = 3000) {
   }, duration);
 }
 
-/**
- * Exporta dados como JSON (download)
- * @param {*} data - Dados para exportar
- * @param {string} filename - Nome do arquivo
- */
 function exportJSON(data, filename) {
   const json = JSON.stringify(data, null, 2);
   const blob = new Blob([json], { type: 'application/json' });

@@ -1,17 +1,6 @@
-// ==========================================
-// EcoAlerta Floripa - Testes Unitários
-// Mini framework de testes sem dependências
-// ==========================================
-
-// Framework de testes simples
 const testResults = [];
 let currentTest = null;
 
-/**
- * Define um teste
- * @param {string} name - Nome do teste
- * @param {Function} fn - Função de teste
- */
 function test(name, fn) {
   currentTest = { name, passed: false, error: null };
   
@@ -27,23 +16,12 @@ function test(name, fn) {
   currentTest = null;
 }
 
-/**
- * Asserção simples
- * @param {boolean} condition - Condição a verificar
- * @param {string} message - Mensagem de erro
- */
 function assert(condition, message = 'Assertion failed') {
   if (!condition) {
     throw new Error(message);
   }
 }
 
-/**
- * Verifica igualdade
- * @param {*} actual - Valor atual
- * @param {*} expected - Valor esperado
- * @param {string} message - Mensagem de erro
- */
 function assertEqual(actual, expected, message) {
   if (actual !== expected) {
     throw new Error(
@@ -52,12 +30,6 @@ function assertEqual(actual, expected, message) {
   }
 }
 
-/**
- * Verifica igualdade profunda de objetos
- * @param {*} actual - Valor atual
- * @param {*} expected - Valor esperado
- * @param {string} message - Mensagem de erro
- */
 function assertDeepEqual(actual, expected, message) {
   const actualStr = JSON.stringify(actual);
   const expectedStr = JSON.stringify(expected);
@@ -69,33 +41,18 @@ function assertDeepEqual(actual, expected, message) {
   }
 }
 
-/**
- * Verifica se valor é verdadeiro
- * @param {*} value - Valor a verificar
- * @param {string} message - Mensagem de erro
- */
 function assertTruthy(value, message) {
   if (!value) {
     throw new Error(message || `Expected truthy value, but got ${value}`);
   }
 }
 
-/**
- * Verifica se valor é falso
- * @param {*} value - Valor a verificar
- * @param {string} message - Mensagem de erro
- */
 function assertFalsy(value, message) {
   if (value) {
     throw new Error(message || `Expected falsy value, but got ${value}`);
   }
 }
 
-// ==========================================
-// TESTES
-// ==========================================
-
-// --- Testes de parseDiaSemana ---
 test('parseDiaSemana: converte "2ª" para 1', () => {
   assertEqual(parseDiaSemana('2ª'), 1);
 });
@@ -112,7 +69,6 @@ test('parseDiaSemana: retorna -1 para valor inválido', () => {
   assertEqual(parseDiaSemana('dia inválido'), -1);
 });
 
-// --- Testes de parseDiaHora ---
 test('parseDiaHora: extrai corretamente "2ª 07:00"', () => {
   const result = parseDiaHora('2ª 07:00');
   assertDeepEqual(result, { diaSemana: 1, hora: 7, minuto: 0 });
@@ -123,12 +79,10 @@ test('parseDiaHora: extrai corretamente "Sábado 08:30"', () => {
   assertDeepEqual(result, { diaSemana: 6, hora: 8, minuto: 30 });
 });
 
-// --- Testes de nextCollection ---
 test('nextCollection: calcula próxima coleta quando hoje é antes do horário', () => {
-  // Cenário: hoje é segunda-feira 10:00, coleta é segunda 15:00
   const config = { bairro: 'Trindade', dias: ['2ª 15:00'] };
   const calendar = { Trindade: ['2ª 15:00'] };
-  const now = new Date('2024-01-08 10:00:00'); // Segunda-feira
+  const now = new Date('2024-01-08 10:00:00');
   
   const result = nextCollection(now, config, calendar);
   
@@ -139,11 +93,9 @@ test('nextCollection: calcula próxima coleta quando hoje é antes do horário',
 });
 
 test('nextCollection: pula para próxima semana se horário já passou', () => {
-  // Cenário: hoje é segunda-feira 16:00, coleta é segunda 15:00 (já passou)
-  // Deve calcular para segunda da próxima semana
   const config = { bairro: 'Trindade', dias: ['2ª 15:00'] };
   const calendar = { Trindade: ['2ª 15:00'] };
-  const now = new Date('2024-01-08 16:00:00'); // Segunda-feira após coleta
+  const now = new Date('2024-01-08 16:00:00');
   
   const result = nextCollection(now, config, calendar);
   
@@ -154,10 +106,9 @@ test('nextCollection: pula para próxima semana se horário já passou', () => {
 });
 
 test('nextCollection: calcula corretamente quando é véspera', () => {
-  // Cenário: hoje é domingo 20:00, coleta é segunda 07:00
   const config = { bairro: 'Trindade', dias: ['2ª 07:00'] };
   const calendar = { Trindade: ['2ª 07:00'] };
-  const now = new Date('2024-01-07 20:00:00'); // Domingo 20:00
+  const now = new Date('2024-01-07 20:00:00');
   
   const result = nextCollection(now, config, calendar);
   
@@ -180,7 +131,7 @@ test('nextCollection: retorna null quando não há bairro', () => {
 test('nextCollection: usa calendar.json quando config.dias está vazio', () => {
   const config = { bairro: 'Centro', dias: [] };
   const calendar = { Centro: ['3ª 07:00', '6ª 07:00'] };
-  const now = new Date('2024-01-08 10:00:00'); // Segunda
+  const now = new Date('2024-01-08 10:00:00');
   
   const result = nextCollection(now, config, calendar);
   
@@ -189,7 +140,6 @@ test('nextCollection: usa calendar.json quando config.dias está vazio', () => {
     'Deve retornar um dos dias do calendar');
 });
 
-// --- Testes de isVesperaColeta ---
 test('isVesperaColeta: retorna true quando faltam 12 horas', () => {
   const now = new Date('2024-01-08 19:00:00');
   const proxima = {
@@ -226,9 +176,7 @@ test('isVesperaColeta: retorna false quando faltam menos de 4 horas', () => {
   assertEqual(result, false);
 });
 
-// --- Testes de addReport ---
 test('addReport: gera protocolo com prefixo ECO-', () => {
-  // Limpar localStorage antes
   localStorage.removeItem('ecoalerta.reports');
   
   const report = {
@@ -244,7 +192,6 @@ test('addReport: gera protocolo com prefixo ECO-', () => {
 });
 
 test('addReport: salva no array do histórico', () => {
-  // Limpar localStorage antes
   localStorage.removeItem('ecoalerta.reports');
   
   const report1 = {
@@ -268,7 +215,6 @@ test('addReport: salva no array do histórico', () => {
   assertEqual(reports[0].protocolo, 'ECO-1000000000000');
   assertEqual(reports[1].protocolo, 'ECO-2000000000000');
   
-  // Limpar depois
   localStorage.removeItem('ecoalerta.reports');
 });
 
@@ -288,7 +234,6 @@ test('addReport: usa timestamp atual quando não fornecido', () => {
   localStorage.removeItem('ecoalerta.reports');
 });
 
-// --- Testes de formatHorasRestantes ---
 test('formatHorasRestantes: formata horas corretamente', () => {
   assertEqual(formatHorasRestantes(0), 'menos de 1 hora');
   assertEqual(formatHorasRestantes(1), '1 hora');
@@ -299,7 +244,6 @@ test('formatHorasRestantes: formata horas corretamente', () => {
   assertEqual(formatHorasRestantes(50), '2 dias e 2h');
 });
 
-// --- Testes de saveConfig e loadConfig ---
 test('saveConfig e loadConfig: salvam e carregam configuração', () => {
   const config = {
     bairro: 'Trindade',
@@ -322,13 +266,6 @@ test('loadConfig: retorna null quando não há configuração', () => {
   assertEqual(result, null);
 });
 
-// ==========================================
-// Renderização dos resultados
-// ==========================================
-
-/**
- * Renderiza resultados dos testes no DOM
- */
 function renderTestResults() {
   const container = document.getElementById('testResults');
   if (!container) {
@@ -340,7 +277,6 @@ function renderTestResults() {
   const failed = testResults.filter(t => !t.passed).length;
   const total = testResults.length;
   
-  // Sumário
   const summaryClass = failed === 0 ? 'success' : 'danger';
   const summaryHTML = `
     <div class="test-summary card ${summaryClass}">
@@ -352,7 +288,6 @@ function renderTestResults() {
     </div>
   `;
   
-  // Lista de testes
   const testsHTML = testResults.map(test => {
     const icon = test.passed ? '✅' : '❌';
     const className = test.passed ? 'pass' : 'fail';
@@ -367,7 +302,6 @@ function renderTestResults() {
   
   container.innerHTML = summaryHTML + testsHTML;
   
-  // Log no console também
   console.log(`\n${'='.repeat(50)}`);
   console.log(`Testes: ${passed}/${total} passaram`);
   console.log(`${'='.repeat(50)}`);
@@ -381,7 +315,6 @@ function renderTestResults() {
   console.log(`${'='.repeat(50)}\n`);
 }
 
-// Executar renderização quando DOM estiver pronto
 if (typeof document !== 'undefined') {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', renderTestResults);
